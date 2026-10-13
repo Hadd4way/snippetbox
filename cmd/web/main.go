@@ -1,27 +1,34 @@
 package main
 
 import (
-	"log"
+	"flag"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
+type application struct {
+	logger *slog.Logger
+}
+
 func main() {
-	mux := http.NewServeMux() // http-router
 
-	fileServer := http.FileServer(http.Dir("../../ui/static/"))
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	addr := flag.String("addr", ":4000", "HTTP network address")
 
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
+	flag.Parse()
 
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	log.Println("starting server on :4000")
+	app := &application{
+		logger: logger,
+	}
 
-	err := http.ListenAndServe(":4000", mux)
+	logger.Info("starting server", slog.String("addr", *addr))
+
+	err := http.ListenAndServe(*addr, app.routes()) // http-router
 
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 }
