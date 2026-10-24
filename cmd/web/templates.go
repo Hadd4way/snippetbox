@@ -21,15 +21,20 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		return nil, err
 	}
 	for _, page := range pages {
-		//extract file name (like "home.tmpl")
 		name := filepath.Base(page)
-		// each iteration gives template for specific page (like home, view, etc.)
-		files := []string{
-			"./ui/html/base.tmpl",
-			"./ui/html/partials/nav.tmpl",
-			page,
+
+		ts, err := template.ParseFiles("./ui/html/base.tmpl")
+		if err != nil {
+			return nil, err
 		}
-		ts, err := template.ParseFiles(files...)
+
+		// now we call parseGlob on template set to add any partials on IT
+		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
+		if err != nil {
+			return nil, err
+		}
+
+		ts, err = ts.ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}
