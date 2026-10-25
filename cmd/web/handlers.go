@@ -61,6 +61,13 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+	// Задает ограничение чтения request. Когда кто то будет
+	// читать его, и лимит привысится то http запрос закроется и будет возвращен request: body to large или как то так.
+	// соответсвенно я задал размер, а прочитался бади только в decodePostForm потому что я туда передал запрос.
+	// и там срабатывает ограничение на 4096 byte, в нем срабатывает ошибка (request: body to large)
+	// а уже при возврате мы получаем http.StatusBadRequest
+	// но если через bruno то там уже statusUnprocessableEntity (Возможно изза различий в размере запроса, через браузер больше)
+	// и оно там уже не может отобразиться потому что слишком большой размер запроса
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	var form snippetCreateForm
 	err := app.decodePostForm(r, &form)
