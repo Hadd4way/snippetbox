@@ -3,14 +3,16 @@ package main
 import (
 	"html/template"
 	"path/filepath"
-	"snippetbox.peter/internal/models"
 	"time"
+
+	"snippetbox.peter/internal/models"
 )
 
 type templateData struct {
 	CurrentYear int
 	Snippet     models.Snippet
 	Snippets    []models.Snippet
+	Form        any
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
