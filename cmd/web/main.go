@@ -51,7 +51,7 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
-
+	sessionManager.Cookie.Secure = true // cookies will be sent only via HTTPS
 	app := &application{
 		logger:         logger,
 		snippets:       &models.SnippetModel{DB: db},
@@ -74,7 +74,7 @@ func main() {
 
 	logger.Info("starting server", slog.String("addr", *addr))
 
-	err = srv.ListenAndServe() //this method on http.Server starts the server
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem") //this method on http.Server starts the server
 
 	if err != nil {
 		logger.Error(err.Error())
