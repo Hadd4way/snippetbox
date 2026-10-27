@@ -74,8 +74,11 @@ func main() {
 		// И он уже дальше пишет записи определенного уровня и регистр-т
 		// их в http.Server
 		// И теперь в случае ошибки http.server пишет errors через slog
-		ErrorLog:  slog.NewLogLogger(logger.Handler(), slog.LevelError),
-		TLSConfig: tlsConfig,
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  time.Second * 5,
+		WriteTimeout: time.Second * 10,
 	}
 
 	logger.Info("starting server", slog.String("addr", *addr))
