@@ -63,6 +63,13 @@ func main() {
 	srv := &http.Server{
 		Addr:    *addr,
 		Handler: app.routes(),
+		//мы не можем настроить http.Server
+		// Чтобы он использовал slog logger handler
+		// Поэтому конвертируем slog logger handler в *log.Logger
+		// И он уже дальше пишет записи определенного уровня и регистр-т
+		// их в http.Server
+		// И теперь в случае ошибки http.server пишет errors через slog
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
 	logger.Info("starting server", slog.String("addr", *addr))
