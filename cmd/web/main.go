@@ -60,9 +60,14 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
+	srv := &http.Server{
+		Addr:    *addr,
+		Handler: app.routes(),
+	}
+
 	logger.Info("starting server", slog.String("addr", *addr))
 
-	err = http.ListenAndServe(*addr, app.routes()) // http-router
+	err = srv.ListenAndServe() //this method on http.Server starts the server
 
 	if err != nil {
 		logger.Error(err.Error())
