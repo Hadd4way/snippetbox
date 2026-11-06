@@ -75,5 +75,9 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 
 // returns true if the current request is from authenticated user, false otherwise
 func (app *application) isAuthenticated(r *http.Request) bool {
-	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+	if !ok {
+		return false
+	}
+	return isAuthenticated
 }

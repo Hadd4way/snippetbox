@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/justinas/nosurf"
 	"net/http"
+
+	"github.com/justinas/nosurf"
 )
 
 func commonHeaders(next http.Handler) http.Handler {
@@ -55,6 +57,7 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 
 		if !app.isAuthenticated(r) {
 			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+			return
 		}
 
 		// otherwise we make Cache-Control - no store header, so that pages
@@ -73,4 +76,34 @@ func (app *application) noSurf(next http.Handler) http.Handler {
 		Secure:   true,
 	})
 	return csrfHandler
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//using authenticatedUserID from the session
+		// if no "authen..ID" value is in the session
+		// in this case calling the next handler in the chain as normal and return
+		id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if id == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+		fmt.Println("here")
+		exists, err := app.users.Exists(id)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+		fmt.Println("or heere")
+		// if matching user is found we know that request comes from an
+		// authenticated user who exists in db. Create new copy of the request
+		// with new value and assign it to request
+
+		if exists {
+			ctx := context.WithValue(r.Context(), isAuthenticatedContextKey, true)
+			r = r.WithContext(ctx)
+		}
+		fmt.Println("hereee")
+		next.ServeHTTP(w, r)
+	})
 }
