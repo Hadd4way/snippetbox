@@ -1,14 +1,21 @@
 package main
 
 import (
-	"github.com/justinas/alice"
 	"net/http"
+
+	"github.com/justinas/alice"
+	"snippetbox.peter/ui"
 )
 
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux() // creating a http-router
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+	//fileserverfs created http handler which serves the embedded
+	// files in ui.Files. And our static files are contained
+	// in the "static" folder, and we don't need to strip
+	// prefixes now -> any requests that start with /static/
+	// can be just passed directly to the file server
+	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
 
 	// unprotected routes use dynamic middleware chain
 	dynamic := alice.New(app.sessionManager.LoadAndSave, app.noSurf, app.authenticate)
