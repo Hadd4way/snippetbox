@@ -17,6 +17,8 @@ func (app *application) routes() http.Handler {
 	// can be just passed directly to the file server
 	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
 
+	mux.HandleFunc("GET /ping", ping)
+
 	// unprotected routes use dynamic middleware chain
 	dynamic := alice.New(app.sessionManager.LoadAndSave, app.noSurf, app.authenticate)
 
