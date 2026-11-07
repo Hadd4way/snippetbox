@@ -216,3 +216,8 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out succesfully!")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+// handler for status-checking of uptime monitoring of the server
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
