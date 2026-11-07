@@ -2,10 +2,11 @@ package main
 
 import (
 	"html/template"
+	"io/fs"
 	"path/filepath"
-	"time"
-
 	"snippetbox.peter/internal/models"
+	"snippetbox.peter/ui"
+	"time"
 )
 
 type templateData struct {
@@ -21,27 +22,23 @@ type templateData struct {
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	// gets a slice of all filepaths
-	// that match the pattern
-	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
+	//	using fs.Glob to get a slice of all filepaths in the ui.Files
+	//	embedded fs. It gives us a slice of all the 'page' templates
+	// for the application
+	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl")
 	if err != nil {
 		return nil, err
 	}
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
-		if err != nil {
-			return nil, err
+		patterns := []string{
+			"html/base.tmpl",
+			"html/partials/*tmpl",
+			page,
 		}
-
-		// now we call parseGlob on template set to add any partials on IT
-		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
-		if err != nil {
-			return nil, err
-		}
-
-		ts, err = ts.ParseFiles(page)
+		//	using parseFS() to parse template files from embedded fs
+		ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, patterns...)
 		if err != nil {
 			return nil, err
 		}

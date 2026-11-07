@@ -8,5 +8,5 @@ import (
 // from ui/static folder in a embedded filesystem
 // referenced by the global variable Files
 
-//go:embed "static"
+//go:embed "html" "static"
 var Files embed.FS
