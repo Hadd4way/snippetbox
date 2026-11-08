@@ -6,6 +6,9 @@ import (
 )
 
 func TestUserModelExists(t *testing.T) {
+	if testing.Short() {
+		t.Skip("models: skipping integration test")
+	}
 	tests := []struct {
 		name   string
 		userID int
