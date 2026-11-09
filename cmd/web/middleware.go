@@ -88,13 +88,11 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		fmt.Println("here")
 		exists, err := app.users.Exists(id)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
 		}
-		fmt.Println("or heere")
 		// if matching user is found we know that request comes from an
 		// authenticated user who exists in db. Create new copy of the request
 		// with new value and assign it to request
@@ -103,7 +101,6 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), isAuthenticatedContextKey, true)
 			r = r.WithContext(ctx)
 		}
-		fmt.Println("hereee")
 		next.ServeHTTP(w, r)
 	})
 }
