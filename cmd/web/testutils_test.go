@@ -108,13 +108,14 @@ func (ts *testServer) postForm(t *testing.T, urlPath string, form url.Values) (i
 	if err != nil {
 		t.Fatal(err)
 	}
-	rs, err := ts.Client().PostForm(ts.URL+urlPath, form)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Origin", ts.URL)
+
+	rs, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer rs.Body.Close()
 	body, err := io.ReadAll(rs.Body)
 	if err != nil {
